@@ -1,9 +1,12 @@
 from lib.my_requests import MyRequests
 from lib.base_case import BaseCase
 from lib.assertions import Assertions
+import allure
 
 
+@allure.feature("Проверка ручки по редактированию пользователя")
 class TestUserEdit(BaseCase):
+    @allure.title("Редактирование только что созданного пользователя")
     def test_edit_just_created_user(self):
         # REGISTER
         register_user = BaseCase.registration_user(self)
@@ -47,6 +50,7 @@ class TestUserEdit(BaseCase):
             "Wrong name of the user after edit"
         )
 
+    @allure.title("Редактирование пользователя без авторизации")
     def test_edit_user_not_auth(self):
         new_name = "Changed Name"
         response = MyRequests.put(
@@ -58,6 +62,7 @@ class TestUserEdit(BaseCase):
         assert response.content.decode("utf-8") == "Auth token not supplied", \
             f"Unexpected response content {response.content}"
 
+    @allure.title("Редактирование пользователя другим пользователем")
     def test_edit_user_auth_another_user(self):
         # REGISTER FIRST USER
         register_first_user = BaseCase.registration_user(self)
@@ -91,6 +96,7 @@ class TestUserEdit(BaseCase):
 
         Assertions.assert_code_status(response2, 400)
 
+    @allure.title("Редактирование пользователя с коротким email")
     def test_edit_user_wrong_email(self):
         # REGISTER
         register_user = BaseCase.registration_user(self)
@@ -122,6 +128,7 @@ class TestUserEdit(BaseCase):
         assert response3.content.decode("utf-8") == "Invalid email format", \
             f"Unexpected response content {response3.content}"
 
+    @allure.title("Редактирование пользователя с длинным email")
     def test_edit_user_short_first_name(self):
         # REGISTER
         register_user = BaseCase.registration_user(self)

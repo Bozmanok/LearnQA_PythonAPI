@@ -1,9 +1,12 @@
 from lib.my_requests import MyRequests
 from lib.base_case import BaseCase
 from lib.assertions import Assertions
+import allure
 
 
+@allure.feature("Проверка ручки по получению информации о пользователе")
 class TestUserGet(BaseCase):
+    @allure.title("Получение информации о пользователе без авторизации")
     def test_get_user_details_not_auth(self):
         response = MyRequests.get("/user/2")
 
@@ -12,6 +15,7 @@ class TestUserGet(BaseCase):
         Assertions.assert_json_has_not_key(response, "firstName")
         Assertions.assert_json_has_not_key(response, "lastName")
 
+    @allure.title("Получение информации о пользователе этим же пользователем")
     def test_get_user_details_auth_as_same_user(self):
         data = {
             'email': 'vinkotov@example.com',
@@ -33,6 +37,7 @@ class TestUserGet(BaseCase):
         expected_fields = ["username", "email", "firstName", "lastName"]
         Assertions.assert_json_has_keys(response2, expected_fields)
 
+    @allure.title("Получение информации о пользователе другим пользователем")
     def test_get_user_details_auth_another_user(self):
         data = {
             'email': 'vinkotov@example.com',

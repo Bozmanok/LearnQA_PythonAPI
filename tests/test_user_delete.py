@@ -1,9 +1,12 @@
 from lib.my_requests import MyRequests
 from lib.base_case import BaseCase
 from lib.assertions import Assertions
+import allure
 
 
+@allure.feature("Проверка ручки по удалению пользователя")
 class TestUserDelete(BaseCase):
+    @allure.title("Удаление тестового пользователя")
     def test_delete_test_user(self):
         # LOGIN
         data = {
@@ -26,6 +29,7 @@ class TestUserDelete(BaseCase):
         assert response2.content.decode("utf-8") == "Please, do not delete test users with ID 1, 2, 3, 4 or 5.", \
             f"Unexpected response content {response2.content}"
 
+    @allure.title("Успешное удаление пользователя")
     def test_delete_user_successfully(self):
         # REGISTER
         register_user = BaseCase.registration_user(self)
@@ -64,6 +68,7 @@ class TestUserDelete(BaseCase):
         assert response3.content.decode("utf-8") == "User not found", \
             f"Unexpected response content {response2.content}"
 
+    @allure.title("Удаление пользователя другим пользователем")
     def test_delete_user_by_another_user(self):
         # REGISTER FIRST USER
         register_first_user = BaseCase.registration_user(self)
