@@ -1,24 +1,79 @@
+import string
+
+import pytest
+
 from lib.my_requests import MyRequests
 from lib.base_case import BaseCase
 from lib.assertions import Assertions
+import random
 
 
 class TestUserRegister(BaseCase):
+    fields = [
+        ('username'),
+        ('password'),
+        ('email'),
+        ('firstName'),
+        ('lastName')
+    ]
 
     def test_create_user_successfully(self):
         data = self.prepare_registration_user()
 
-        repsonse = MyRequests.post("/user/", data=data)
+        response = MyRequests.post("/user/", data=data)
 
-        Assertions.assert_code_status(repsonse, 200)
-        Assertions.assert_json_has_key(repsonse, "id")
-
+        Assertions.assert_code_status(response, 200)
+        Assertions.assert_json_has_key(response, "id")
 
     def test_create_user_with_existing_email(self):
         email = 'vinkotov@example.com'
         data = self.prepare_registration_user(email)
 
-        repsonse = MyRequests.post("/user/", data=data)
+        response = MyRequests.post("/user/", data=data)
 
-        Assertions.assert_code_status(repsonse, 400)
-        assert repsonse.content.decode("utf-8") == f"Users with email '{email}' already exists", f"Unexpected response content {repsonse.content}"
+        Assertions.assert_code_status(response, 400)
+        assert response.content.decode("utf-8") == f"Users with email '{email}' already exists", \
+            f"Unexpected response content {response.content}"
+
+    def test_create_user_with_wrong_email(self):
+        email = 'vinkotovexample.com'
+        data = self.prepare_registration_user(email)
+
+        response = MyRequests.post("/user/", data=data)
+
+        Assertions.assert_code_status(response, 400)
+        assert response.content.decode("utf-8") == "Invalid email format", \
+            f"Unexpected response content {response.content}"
+
+    @pytest.mark.parametrize('field', fields)
+    def test_create_user_without_any_field(self, field):
+        data = self.prepare_registration_user()
+        del data[field]
+
+        response = MyRequests.post("/user/", data=data)
+
+        Assertions.assert_code_status(response, 400)
+        assert response.content.decode("utf-8") == f"The following required params are missed: {field}", \
+            f"Unexpected response content {response.content}"
+
+    def test_create_user_with_short_username(self):
+        data = self.prepare_registration_user()
+        data['username'] = 'a'
+
+        response = MyRequests.post("/user/", data=data)
+
+        Assertions.assert_code_status(response, 400)
+        assert response.content.decode("utf-8") == "The value of 'username' field is too short", \
+            f"Unexpected response content {response.content}"
+
+    def test_create_user_with_long_username(self):
+        data = self.prepare_registration_user()
+
+        username = ''.join(random.choices(string.ascii_uppercase, k=251))
+        data['username'] = username
+
+        response = MyRequests.post("/user/", data=data)
+
+        Assertions.assert_code_status(response, 400)
+        assert response.content.decode("utf-8") == "The value of 'username' field is too long", \
+            f"Unexpected response content {response.content}"
