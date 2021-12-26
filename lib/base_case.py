@@ -1,6 +1,8 @@
 import json.decoder
 from datetime import datetime
 from requests import Response
+from lib.my_requests import MyRequests
+from lib.assertions import Assertions
 
 
 class BaseCase:
@@ -26,7 +28,7 @@ class BaseCase:
         if email is None:
             base_part = "learnqa"
             domain = "example.com"
-            random_part = datetime.now().strftime("%m%d%Y%H%M%S")
+            random_part = datetime.now().strftime("%m%d%Y%H%M%S%f")
             email = f"{base_part}{random_part}@{domain}"
         return {
             'password': '123',
@@ -34,4 +36,21 @@ class BaseCase:
             'firstName': 'learnqa',
             'lastName': 'learnqa',
             'email': email
+        }
+
+    def registration_user(self, email=None):
+        register_data = self.prepare_registration_user(email)
+
+        response = MyRequests.post("/user/", data=register_data)
+
+        Assertions.assert_code_status(response, 200)
+        Assertions.assert_json_has_key(response, "id")
+
+        return {
+            'user_id': self.get_json_value(response, "id"),
+            'username': register_data['username'],
+            'password': register_data["password"],
+            'email': register_data["email"],
+            'first_name': register_data["firstName"],
+            'lastName': register_data['lastName']
         }
